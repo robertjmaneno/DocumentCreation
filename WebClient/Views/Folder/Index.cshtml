@@ -1,0 +1,143 @@
+﻿@model FolderContentsDto
+@{
+    ViewData["Title"] = "Root Folders";
+}
+
+<h1>Root Folders</h1>
+
+<div id="folder-list">
+    @if (Model.Subfolders.Any())
+    {
+        foreach (var folder in Model.Subfolders)
+        {
+            <div class="folder root-folder" data-folder-id="@folder.Id">
+                <a href="@Url.Action("ViewFolder", new { path = folder.Path })" class="folder-link">
+                    <i class="fas fa-folder fa-3x"></i>
+                    <div class="folder-name">@folder.Name</div>
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No root folders found.</p>
+    }
+</div>
+
+<button class="btn btn-primary mt-3" id="create-root-folder-btn">Create Root Folder</button>
+
+<!-- Create Root Folder Modal -->
+<div class="modal fade" id="create-folder-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Root Folder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="create-folder-form">
+                <div class="modal-body">
+                    <input type="text" class="form-control" name="Name" placeholder="Enter folder name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .folder, .file {
+            width: 120px;
+            height: 120px;
+            margin: 10px;
+            text-align: center;
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .folder {
+            background-color: #f8d775;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .folder:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 50%;
+                height: 12px;
+                background-color: #e0b94e;
+                border-radius: 10px 10px 0 0;
+            }
+
+        .file {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+            .folder i, .file i {
+                font-size: 3em;
+                margin-top: 20px;
+            }
+
+        .folder-name, .file-name {
+            margin-top: 10px;
+            word-wrap: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .folder-link {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Handle root folder creation
+            $('#create-root-folder-btn').click(function () {
+                $('#create-folder-modal').modal('show');
+            });
+
+            // Handle folder creation
+            $('#create-folder-form').submit(function (e) {
+                e.preventDefault();
+                var formData = {
+                    Name: $('input[name="Name"]', this).val(),
+                    ParentId: null  // null for root folders
+                };
+                $.ajax({
+                    url: '@Url.Action("CreateFolder", "Folder")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload(); // Reload the page to show the new root folder
+                        } else {
+                            alert('Error creating folder: ' + response.message);
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error details:", jqXHR.responseText);
+                        alert('An error occurred while creating the folder. Check console for details.');
+                    }
+                });
+            });
+        });
+    </script>
+}

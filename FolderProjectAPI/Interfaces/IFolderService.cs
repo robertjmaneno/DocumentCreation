@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using FolderProjectAPI.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using FolderProjectAPI.Models;
 
 namespace FolderProjectAPI.Interfaces
 {
     public interface IFolderService
     {
-        Task<IEnumerable<Folder>> GetAllFoldersAsync();
-        Task<Folder> GetFolderByIdAsync(int id);
-        Task<Folder> CreateFolderAsync(Folder folder);
-        Task<Folder> UpdateFolderAsync(Folder folder);
+        Task<IEnumerable<FolderDto>> GetAllFoldersAsync();
+        Task<FolderDto> GetFolderByPathAsync(string path);
+        Task<IEnumerable<FolderDto>> GetFoldersAsync(string path);
+        Task<FolderDto> CreateFolderAsync(CreateFolderDto createFolderDto);
+        Task<FolderContentsDto> GetFolderContentsAsync(string path);
+        Task<FolderDto> UpdateFolderAsync(int id, string newName);
         Task DeleteFolderAsync(int id);
     }
 }

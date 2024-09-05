@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-
-namespace FolderProjectAPI.Models
+namespace WebClient.Models
 {
     public class Folder
     {
@@ -10,9 +8,9 @@ namespace FolderProjectAPI.Models
         public string Path { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastModified { get; set; }
-        public int? ParentId { get; set; }
+        public int? ParentId { get; set; } // Nullable for root folders
         public virtual Folder Parent { get; set; }
-        public virtual ICollection<Folder> Subfolders { get; set; }
-        public virtual ICollection<FileItem> Files { get; set; }
+        public virtual ICollection<Folder> Subfolders { get; set; } = new HashSet<Folder>();
+        public virtual ICollection<FileItem> Files { get; set; } = new HashSet<FileItem>();
     }
 }

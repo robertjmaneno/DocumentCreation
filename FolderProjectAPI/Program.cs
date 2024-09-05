@@ -1,23 +1,37 @@
-using FolderManagementSystem.Services;
 using FolderProjectAPI.Data;
 using FolderProjectAPI.Interfaces;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using FolderProjectAPI.Mappings;
+using FolderProjectAPI.Repositories;
+using FolderProjectAPI.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+// Add DbContext
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(FolderProfile));
+
+// Add repositories
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IFileItemRepository, FileItemRepository>();
+
+
+// Add FolderService
 builder.Services.AddScoped<IFolderService, FolderService>();
 
-builder.Services.AddAutoMapper(typeof());
+// Add logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 var app = builder.Build();
 
@@ -33,5 +47,13 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Ensure the database is created and migrations are applied
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();
